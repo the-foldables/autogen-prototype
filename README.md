@@ -20,14 +20,9 @@ conda activate autogen_env
 
 Install packages: # TODO change to requirements.txt
 ```
-python -m pip install openai
-python -m pip install scikit-learn
-python -m pip install autogen-agentchat~=0.2
-python -m pip install flaml[automl]
-python -m pip install -U matplotlib
-python -m pip install llama-index llama-index-tools-wikipedia llama-index-readers-wikipedia wikipedia
-python -m pip install llama-index-llms-litellm
-python -m pip install llama-index-embeddings-litellm
+python -m pip install uv
+uv pip install requirements.txt
+uv pip install -U matplotlib
 ```
 
 Deactivate environment:
@@ -44,6 +39,7 @@ export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
 export API_KEY={your-openai-api-key} 
+python chat.py
 ```
 
 ## Known Issues
