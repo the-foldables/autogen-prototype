@@ -10,20 +10,25 @@ from llama_index.embeddings.litellm import LiteLLMEmbedding
 
 from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexConversableAgent
 
+import agent_system_prompts
 
+base_url = "https://api.cborg.lbl.gov"
+model = "openai/lbl/cborg-chat:latest"
+embedding_model = "openai/lbl/nomic-embed-text"
+api_key = os.environ["API_KEY"] # do not insert API key in plaintext!
 
-config_list = [{"model": "openai/lbl/cborg-chat:latest", "api_key": os.environ["API_KEY"], 
-              "base_url":"https://api.cborg.lbl.gov",
+config_list = [{"model": model, "api_key": api_key, 
+              "base_url": base_url,
               "api_rate_limit":60.0, "price" : [0, 0]}]
 
-llm = LiteLLM(model="openai/lbl/cborg-chat:latest",
-              api_key=os.environ.get('API_KEY'), # do not insert API key in plaintext!
-              api_base="https://api.cborg.lbl.gov",
+llm = LiteLLM(model=model,
+              api_key=api_key, 
+              api_base=base_url,
               )
 
-embedding = LiteLLMEmbedding(model_name="openai/lbl/nomic-embed-text",
-              api_key=os.environ.get('API_KEY'), # do not insert API key in plaintext!
-              api_base="https://api.cborg.lbl.gov",
+embedding = LiteLLMEmbedding(model_name=embedding_model,
+              api_key=api_key,
+              api_base=base_url,
               )
 
 
@@ -46,8 +51,8 @@ llm_config = {
 trip_assistant = LLamaIndexConversableAgent(
     "trip_specialist",
     llama_index_agent=location_specialist,
-    system_message="You help customers finding more about places they would like to visit. You can use external resources to provide more details as you engage with the customer.",
-    description="This agents helps customers discover locations to visit, things to do, and other details about a location. It can use external resources to provide more details. This agent helps in finding attractions, history and all that there si to know about a place",
+    system_message=agent_system_prompts.trip_assistant,
+    description=agent_system_prompts.trip_assistant_description,
     
 )
 
@@ -68,5 +73,5 @@ manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
 
 chat_result = user_proxy.initiate_chat(
     manager,
-    message="What can i find in Tokyo related to Hayao Miyazaki and its moveis like Spirited Away?.",
+    message="What can i find in Tokyo related to Hayao Miyazaki and its moveis like Spirited Away?",
 )

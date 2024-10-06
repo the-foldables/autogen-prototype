@@ -18,16 +18,10 @@ conda create --name autogen_env python=3.12
 conda activate autogen_env
 ```
 
-Install packages: # TODO change to requirements.txt
+Install packages:
 ```
-python -m pip install openai
-python -m pip install scikit-learn
-python -m pip install autogen-agentchat~=0.2
-python -m pip install flaml[automl]
-python -m pip install -U matplotlib
-python -m pip install llama-index llama-index-tools-wikipedia llama-index-readers-wikipedia wikipedia
-python -m pip install llama-index-llms-litellm
-python -m pip install llama-index-embeddings-litellm
+python -m pip install -r requirements.txt
+brew install libomp
 ```
 
 Deactivate environment:
@@ -44,6 +38,11 @@ export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
 export API_KEY={your-openai-api-key} 
+```
+
+Run the code:
+```
+python -m chat.py
 ```
 
 ## Known Issues
@@ -67,6 +66,6 @@ Line 454:
 
 ## Resources
 
-[AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)
-[LlamaIndex](https://docs.llamaindex.ai/en/stable/)
-[How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
+- [AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)
+- [LlamaIndex](https://docs.llamaindex.ai/en/stable/)
+- [How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
