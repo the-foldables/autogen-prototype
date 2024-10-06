@@ -42,7 +42,7 @@ export API_KEY={your-openai-api-key}
 
 Run the code:
 ```
-python -m chat.py
+python -m main.py
 ```
 
 ## Resources

@@ -12,10 +12,18 @@ from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexCon
 
 import agent_system_prompts
 
-base_url = "https://api.cborg.lbl.gov"
-model = "openai/lbl/cborg-chat:latest"
-embedding_model = "openai/lbl/nomic-embed-text"
 api_key = os.environ["API_KEY"] # do not insert API key in plaintext!
+cborg = True
+
+if cborg:
+    base_url = "https://api.cborg.lbl.gov"
+    model = "openai/lbl/cborg-chat:latest"
+    embedding_model = "openai/lbl/nomic-embed-text"
+else:
+    base_url = "https://api.openai.com/v1"
+    model = "gpt-3.5-turbo"
+    embedding_model = "text-embedding-3-small"
+
 
 config_list = [{"model": model, "api_key": api_key, 
               "base_url": base_url,
