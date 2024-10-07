@@ -45,6 +45,11 @@ Run the code:
 python -m main
 ```
 
+If using LBNL credentials for the API key:
+```
+python -m main --cborg
+```
+
 ## Resources
 
 - [AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)

@@ -1,5 +1,6 @@
 import os
 import autogen
+import argparse
 
 from llama_index.core import Settings
 from llama_index.core.agent import ReActAgent
@@ -12,10 +13,13 @@ from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexCon
 
 import agent_system_prompts
 
-api_key = os.environ["API_KEY"] # do not insert API key in plaintext!
-cborg = True
+parser = argparse.ArgumentParser()
+parser.add_argument('--cborg', action='store_true', help='Running with LBNL credentials')
+args = parser.parse_args()
 
-if cborg:
+api_key = os.environ["API_KEY"] # do not insert API key in plaintext!
+
+if args.cborg:
     base_url = "https://api.cborg.lbl.gov"
     model = "openai/lbl/cborg-chat:latest"
     embedding_model = "openai/lbl/nomic-embed-text"
