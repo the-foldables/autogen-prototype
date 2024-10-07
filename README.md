@@ -38,6 +38,7 @@ export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
 export API_KEY={your-openai-api-key} 
+python chat.py
 ```
 
 Run the code:
