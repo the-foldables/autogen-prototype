@@ -65,12 +65,6 @@ AutoGen example:
 ```
 panel serve main.py --args --cborg
 ```
-### AutoGen Patch
-
-Use the terminal to find where your AutoGen package code lives:
-```
-python -m pip show autogen-agentchat
-```
 
 ## Resources
 
@@ -78,3 +72,4 @@ python -m pip show autogen-agentchat
 - [LlamaIndex](https://docs.llamaindex.ai/en/stable/)
 - [How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
 - [AutoGen’s Full Function UI Powered by Panel](https://levelup.gitconnected.com/autogens-full-function-ui-powered-by-panel-d00ddecc98ee)
+- [AutoGen + Panel Tutorials](https://github.com/yeyu2/Youtube_demos)
