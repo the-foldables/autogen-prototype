@@ -65,6 +65,12 @@ AutoGen example:
 ```
 panel serve main.py --args --cborg
 ```
+### AutoGen Patch
+
+Use the terminal to find where your AutoGen package code lives:
+```
+python -m pip show autogen-agentchat
+```
 
 ## Resources
 
