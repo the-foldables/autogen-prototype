@@ -11,6 +11,7 @@ from llama_index.embeddings.litellm import LiteLLMEmbedding
 
 from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexConversableAgent
 
+import panel as pn
 import agent_system_prompts
 
 parser = argparse.ArgumentParser()
@@ -29,20 +30,25 @@ else:
     embedding_model = "text-embedding-3-small"
 
 
-config_list = [{"model": model, "api_key": api_key, 
+config_list = [
+    {
+        "model": model, "api_key": api_key, 
               "base_url": base_url,
-              "api_rate_limit":60.0, "price" : [0, 0]}]
+              "api_rate_limit":60.0, "price" : [0, 0]
+    }
+]
 
-llm = LiteLLM(model=model,
-              api_key=api_key, 
-              api_base=base_url,
-              )
+llm = LiteLLM(
+    model=model,
+    api_key=api_key, 
+    api_base=base_url,
+)
 
-embedding = LiteLLMEmbedding(model_name=embedding_model,
-              api_key=api_key,
-              api_base=base_url,
-              )
-
+embedding = LiteLLMEmbedding(
+    model_name=embedding_model,
+    api_key=api_key,
+    api_base=base_url,
+)
 
 Settings.llm = llm
 Settings.embed_model = embedding
@@ -53,7 +59,9 @@ wiki_spec = WikipediaToolSpec()
 # Get the search wikipedia tool
 wikipedia_tool = wiki_spec.to_tool_list()[1]
 
-location_specialist = ReActAgent.from_tools(tools=[wikipedia_tool], llm=llm, max_iterations=10, verbose=True)
+location_specialist = ReActAgent.from_tools(
+    tools=[wikipedia_tool], llm=llm, max_iterations=10, verbose=True
+)
 
 llm_config = {
     "temperature": 0,
@@ -70,20 +78,48 @@ trip_assistant = LLamaIndexConversableAgent(
 
 user_proxy = autogen.UserProxyAgent(
     name="Admin",
-    human_input_mode="ALWAYS",
+    human_input_mode="NEVER",
     code_execution_config=False,
 )
 
 groupchat = autogen.GroupChat(
     agents=[trip_assistant, user_proxy],
     messages=[],
-    max_round=500,
-    speaker_selection_method="round_robin",
-    enable_clear_history=True,
+    max_round=10,
+    allow_repeat_speaker=False
 )
 manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
 
-chat_result = user_proxy.initiate_chat(
-    manager,
-    message="What can i find in Tokyo related to Hayao Miyazaki and its moveis like Spirited Away?",
+avatar = {user_proxy.name:"👨‍💼", trip_assistant.name:"🗓"}
+
+def print_messages(recipient, messages, sender, config):
+    chat_interface.send(
+        messages[-1]['content'], user=messages[-1]['name'],
+        avatar=avatar[messages[-1]['name']], respond=False
+    )
+    print(f"Messages from: {sender.name} sent to: {recipient.name} | num_messages: {len(messages)} | message: {messages[-1]}")
+    return False, None # required to ensure the agent communication flow continues
+
+trip_assistant.register_reply(
+    [autogen.Agent, None],
+    reply_func=print_messages,
+    config={"callback": None}  
 )
+
+user_proxy.register_reply(
+    [autogen.Agent, None],
+    reply_func=print_messages,
+    config={"callback": None}
+)
+
+pn.extension(design="material")
+
+def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
+    chat_result = user_proxy.initiate_chat(
+        manager,
+        message=contents,
+    )
+
+chat_interface = pn.chat.ChatInterface(callback=callback, callback_exception='verbose')
+chat_interface.send("Send a message!", user="System", respond=False)
+chat_interface.servable()

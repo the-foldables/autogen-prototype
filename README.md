@@ -38,17 +38,32 @@ export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
 export API_KEY={your-openai-api-key} 
-python chat.py
 ```
 
-Run the code:
+## Run the code
+
+### OpenAI API key
+
+Simple test:
 ```
-python -m main
+panel serve test_panel.py
 ```
 
-If using LBNL credentials for the API key:
+AutoGen example:
 ```
-python -m main --cborg
+panel serve main.py 
+```
+
+### If using LBNL credentials for the API key
+
+Simple test:
+```
+panel serve test_panel.py --args --cborg
+```
+
+AutoGen example:
+```
+panel serve main.py --args --cborg
 ```
 
 ## Resources
@@ -56,3 +71,4 @@ python -m main --cborg
 - [AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)
 - [LlamaIndex](https://docs.llamaindex.ai/en/stable/)
 - [How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
+- [AutoGen’s Full Function UI Powered by Panel](https://levelup.gitconnected.com/autogens-full-function-ui-powered-by-panel-d00ddecc98ee)

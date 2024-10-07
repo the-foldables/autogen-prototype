@@ -9,3 +9,4 @@ llama-index-readers-wikipedia
 wikipedia
 llama-index-llms-litellm
 llama-index-embeddings-litellm
+panel
