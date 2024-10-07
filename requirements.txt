@@ -2,9 +2,10 @@ openai
 scikit-learn
 autogen-agentchat~=0.2
 flaml[automl]
-llama-index
-llama-index-tools-wikipedia
-llama-index-readers-wikipedia
+matplotlib>=3.0.0
+llama-index 
+llama-index-tools-wikipedia 
+llama-index-readers-wikipedia 
 wikipedia
 llama-index-llms-litellm
 llama-index-embeddings-litellm

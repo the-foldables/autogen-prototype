@@ -18,11 +18,10 @@ conda create --name autogen_env python=3.12
 conda activate autogen_env
 ```
 
-Install packages: # TODO change to requirements.txt
+Install packages:
 ```
-python -m pip install uv
-uv pip install requirements.txt
-uv pip install -U matplotlib
+python -m pip install -r requirements.txt
+brew install libomp
 ```
 
 Deactivate environment:
@@ -42,27 +41,13 @@ export API_KEY={your-openai-api-key}
 python chat.py
 ```
 
-## Known Issues
-
-Apply the following patches:
-
+Run the code:
 ```
-.../autogen_env/lib/python3.12/site-packages/litellm/cost_calculator.py
-
-Line 808:
-    except Exception as e:
-        return 0
-        # raise e
-```
-
-```
-.../autogen_env/lib/python3.12/site-packages/autogen/oai/client.py
-Line 454:
-            self._initialize_rate_limiters(self._config_list)
+python -m main
 ```
 
 ## Resources
 
-[AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)
-[LlamaIndex](https://docs.llamaindex.ai/en/stable/)
-[How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
+- [AutoGen tutorial](https://microsoft.github.io/autogen/docs/tutorial/introduction)
+- [LlamaIndex](https://docs.llamaindex.ai/en/stable/)
+- [How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
