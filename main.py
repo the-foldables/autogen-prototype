@@ -1,8 +1,3 @@
-"""
-https://github.com/yeyu2/Youtube_demos/blob/main/panel_autogen_2.py
-"""
-# To install required packages:
-# pip install pyautogen==0.2.9 panel==1.3.8
 import autogen
 
 import panel as pn

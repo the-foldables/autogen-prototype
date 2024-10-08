@@ -73,3 +73,4 @@ panel serve main.py --args --cborg
 - [How to Create a Web UI for AutoGen](https://yeyu.substack.com/p/how-to-create-a-web-ui-for-autogen)
 - [AutoGen’s Full Function UI Powered by Panel](https://levelup.gitconnected.com/autogens-full-function-ui-powered-by-panel-d00ddecc98ee)
 - [AutoGen + Panel Tutorials](https://github.com/yeyu2/Youtube_demos)
+- [AutoGen + Panel Code](https://github.com/yeyu2/Youtube_demos/blob/main/panel_autogen_2.py)
