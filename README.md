@@ -49,16 +49,9 @@ Simple test:
 panel serve test_panel.py
 ```
 
-AutoGen example:
+AutoGen with panel example:
 ```
 panel serve main.py 
-```
-
-### If using LBNL credentials for the API key
-
-AutoGen example:
-```
-panel serve main.py --args --cborg
 ```
 
 ## Resources
