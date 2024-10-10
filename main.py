@@ -107,17 +107,10 @@ code_executor = DockerCommandLineCodeExecutor(
 executor = autogen.ConversableAgent(
     name="Executor",
     system_message=prompts.executor,
-    # llm_config=False,  # Turn off LLM for this agent.
     code_execution_config={"executor": code_executor},  # Use the docker command line code executor.
     human_input_mode="NEVER",  
 )
 
-# executor = autogen.UserProxyAgent(
-#     name="Executor",
-#     system_message=prompts.executor,
-#     human_input_mode="NEVER",
-#     code_execution_config={"last_n_messages": 3, "work_dir": "paper", "use_docker": False},
-# )
 critic = autogen.AssistantAgent(
     name="Critic",
     system_message=prompts.critic,
