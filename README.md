@@ -56,11 +56,6 @@ panel serve main.py
 
 ### If using LBNL credentials for the API key
 
-Simple test:
-```
-panel serve test_panel.py --args --cborg
-```
-
 AutoGen example:
 ```
 panel serve main.py --args --cborg
