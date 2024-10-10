@@ -11,66 +11,17 @@ from llama_index.core import Settings
 from llama_index.core.agent import ReActAgent
 from llama_index.tools.wikipedia import WikipediaToolSpec
 
-from llama_index.llms.litellm import LiteLLM
-from llama_index.embeddings.litellm import LiteLLMEmbedding
-
 from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexConversableAgent
 
+
+import prompts
+from api_config import get_api_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cborg', action='store_true', help='Running with LBNL credentials')
 args = parser.parse_args()
 
-api_key = os.environ["API_KEY"] # do not insert API key in plaintext!
-
-if args.cborg:
-    base_url = "https://api.cborg.lbl.gov"
-    model = "openai/lbl/cborg-chat:latest"
-    model_gpt = "openai/gpt-4o-mini"
-    embedding_model = "openai/lbl/nomic-embed-text"
-else:
-    base_url = "https://api.openai.com/v1"
-    model = "gpt-4o-mini"
-    model_gpt = model
-    embedding_model = "text-embedding-3-small"
-
-config_list = [
-    {
-        "model": model, "api_key": api_key, 
-              "base_url": base_url,
-              "api_rate_limit":60.0, "price" : [0, 0]
-    }
-]
-
-config_list_gpt = [
-    {
-        "model": model_gpt, "api_key": api_key, 
-              "base_url": base_url,
-              "api_rate_limit":60.0, "price" : [0, 0]
-    }
-]
-
-llm_config = {
-    "temperature": 0,
-    "config_list": config_list,
-}
-
-llm_config_gpt = {
-    "temperature": 0,
-    "config_list": config_list_gpt,
-}
-
-llm = LiteLLM(
-    model=model,
-    api_key=api_key, 
-    api_base=base_url,
-)
-
-embedding = LiteLLMEmbedding(
-    model_name=embedding_model,
-    api_key=api_key,
-    api_base=base_url,
-)
+llm_config, llm_config_gpt, llm, embedding = get_api_config(args.cborg)
 
 Settings.llm = llm
 Settings.embed_model = embedding
@@ -88,8 +39,8 @@ llamaindex_specialist = ReActAgent.from_tools(
 llamaindex_assistant = LLamaIndexConversableAgent(
     name="llamaindex_assistant",
     llama_index_agent=llamaindex_specialist,
-    system_message="You can use Wikipedia to provide more details about any aspect of the plan.",
-    description="This agent uses Wikipedia to provide more details about any aspect of the plan.",
+    system_message=prompts.llamaindex_assistant,
+    description=prompts.llamaindex_assistant_description,
 )
 
 input_future = None
@@ -115,51 +66,40 @@ class MyConversableAgent(autogen.ConversableAgent):
 user_proxy = MyConversableAgent(
    name="Admin",
    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("exit"),
-   system_message="""A human admin. Interact with the planner to discuss the plan. Plan execution needs to be approved by this admin. 
-   
-   """,
+   system_message=prompts.user_proxy,
    #Only say APPROVED in most cases, and say exit when nothing to be done further. Do not say others.
    code_execution_config=False,
    #default_auto_reply="Approved", 
    human_input_mode="ALWAYS",
-   #llm_config=gpt4_config,
 )
 
 engineer = autogen.AssistantAgent(
     name="Engineer",
     human_input_mode="NEVER",
     llm_config=llm_config,
-    system_message='''Engineer. You follow an approved plan. You write python/shell code to solve tasks. Wrap the code in a code block that specifies the script type. The user can't modify your code. So do not suggest incomplete code which requires others to modify. Don't use a code block if it's not intended to be executed by the executor.
-Don't include multiple code blocks in one response. Do not ask others to copy and paste the result. Check the execution result returned by the executor.
-If the result indicates there is an error, fix the error and output the code again. Suggest the full code instead of partial code or code changes. If the error can't be fixed or if the task is not solved even after the code is executed successfully, analyze the problem, revisit your assumption, collect additional info you need, and think of a different approach to try.
-''',
+    system_message=prompts.engineer,
 )
 scientist = autogen.AssistantAgent(
     name="Scientist",
     human_input_mode="NEVER",
     llm_config=llm_config,
-    system_message="""Scientist. You follow an approved plan. You are able to categorize papers after seeing their abstracts printed. You don't write code."""
+    system_message=prompts.scientist
 )
 planner = autogen.AssistantAgent(
     name="Planner",
     human_input_mode="NEVER",
-    system_message='''Planner. Suggest a plan. Revise the plan based on feedback from admin and critic, until admin approval.
-The plan may involve an engineer who can write code and a scientist who doesn't write code.
-Explain the plan first. Be clear which step is performed by an engineer, and which step is performed by a scientist.
-''',
+    system_message=prompts.planner,
     llm_config=llm_config,
 )
 executor = autogen.UserProxyAgent(
     name="Executor",
-    system_message="Executor. Execute the code written by the engineer and report the result.",
+    system_message=prompts.executor,
     human_input_mode="NEVER",
     code_execution_config={"last_n_messages": 3, "work_dir": "paper", "use_docker": False},
 )
 critic = autogen.AssistantAgent(
     name="Critic",
-    system_message="""Critic. Double check plan, claims, code from other agents and provide feedback. 
-    Check whether the plan includes adding verifiable info such as source URL. 
-    """,
+    system_message=prompts.critic,
     llm_config=llm_config,
     human_input_mode="NEVER",
 )
