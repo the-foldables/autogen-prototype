@@ -6,13 +6,14 @@ import os
 import time
 import asyncio
 import argparse
+import tempfile
 
 from llama_index.core import Settings
 from llama_index.core.agent import ReActAgent
 from llama_index.tools.wikipedia import WikipediaToolSpec
 
 from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexConversableAgent
-
+from autogen.coding import DockerCommandLineCodeExecutor
 
 import prompts
 from api_config import get_api_config
@@ -20,6 +21,9 @@ from api_config import get_api_config
 parser = argparse.ArgumentParser()
 parser.add_argument('--cborg', action='store_true', help='Running with LBNL credentials')
 args = parser.parse_args()
+
+# Create a temporary directory to store code files created by the code_executor_agent_using_docker
+temp_dir = tempfile.TemporaryDirectory()
 
 llm_config, llm_config_gpt, llm, embedding = get_api_config(args.cborg)
 
@@ -91,12 +95,22 @@ planner = autogen.AssistantAgent(
     system_message=prompts.planner,
     llm_config=llm_config,
 )
-executor = autogen.UserProxyAgent(
+
+# Create a Docker command line code executor.
+code_executor = DockerCommandLineCodeExecutor(
+    image="python:3.12-slim",  # Execute code using the given docker image name.
+    timeout=10,  # Timeout for each code execution in seconds.
+    work_dir=temp_dir.name,  # Use the temporary directory to store the code files.
+)
+
+# Create an agent with code executor configuration that uses docker.
+executor = autogen.ConversableAgent(
     name="Executor",
     system_message=prompts.executor,
-    human_input_mode="NEVER",
-    code_execution_config={"last_n_messages": 3, "work_dir": "paper", "use_docker": False},
+    code_execution_config={"executor": code_executor},  # Use the docker command line code executor.
+    human_input_mode="NEVER",  
 )
+
 critic = autogen.AssistantAgent(
     name="Critic",
     system_message=prompts.critic,

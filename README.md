@@ -29,6 +29,9 @@ Deactivate environment:
 conda deactivate
 ```
 
+Install [Docker](https://docs.docker.com/engine/install/).
+
+
 ## Startup Instructions
 
 After installation, you can startup in a new terminal with the following instructions:
@@ -39,6 +42,8 @@ cd $WORKING_DIR
 conda activate autogen_env
 export API_KEY={your-openai-api-key} 
 ```
+
+Open Docker in the background.
 
 ## Run the code
 
