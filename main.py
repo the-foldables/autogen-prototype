@@ -155,8 +155,9 @@ def print_messages(recipient, messages, sender, config):
     print(f"Messages from: {sender.name} sent to: {recipient.name} | num messages: {len(messages)} | message: {messages[-1]}")
 
     content = messages[-1]['content']
-    if len(messages)>1 and content != '':
-        chat_interface.send(content, user=recipient.name, avatar=avatar[recipient.name], respond=False)
+    user = messages[-1]['name'] 
+    if len(messages)>1 and content != '' and user != 'Admin':
+        chat_interface.send(content, user=user, avatar=avatar[user], respond=False)
 
     return False, None  # required to ensure the agent communication flow continues
 
