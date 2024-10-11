@@ -1,9 +1,3 @@
-import autogen
-
-import panel as pn
-import openai
-import os
-import time
 import asyncio
 import argparse
 import tempfile
@@ -12,10 +6,15 @@ from llama_index.core import Settings
 from llama_index.core.agent import ReActAgent
 from llama_index.tools.wikipedia import WikipediaToolSpec
 
+import autogen
 from autogen.agentchat.contrib.llamaindex_conversable_agent import LLamaIndexConversableAgent
 from autogen.coding import DockerCommandLineCodeExecutor
+from autogen import register_function
+
+import panel as pn
 
 import prompts
+from tools import calculator
 from api_config import get_api_config
 
 parser = argparse.ArgumentParser()
@@ -37,7 +36,7 @@ wiki_spec = WikipediaToolSpec()
 wikipedia_tool = wiki_spec.to_tool_list()[1]
 
 llamaindex_specialist = ReActAgent.from_tools(
-    tools=[wikipedia_tool], llm=llm, max_iterations=10, verbose=True
+    tools=[wikipedia_tool], llm=llm, max_iterations=20, verbose=True
 )
 
 llamaindex_assistant = LLamaIndexConversableAgent(
@@ -83,12 +82,14 @@ engineer = autogen.AssistantAgent(
     llm_config=llm_config,
     system_message=prompts.engineer,
 )
+
 scientist = autogen.AssistantAgent(
     name="Scientist",
     human_input_mode="NEVER",
     llm_config=llm_config,
     system_message=prompts.scientist
 )
+
 planner = autogen.AssistantAgent(
     name="Planner",
     human_input_mode="NEVER",
@@ -118,23 +119,45 @@ critic = autogen.AssistantAgent(
     human_input_mode="NEVER",
 )
 
-groupchat = autogen.GroupChat(agents=[user_proxy, engineer, scientist, planner, executor, critic, llamaindex_assistant], messages=[], max_round=20)
+# Suggests use of the calculator
+calculator_assistant = autogen.ConversableAgent(
+    name="Calculator_Assistant",
+    system_message=prompts.calculator,
+    llm_config=llm_config_gpt,
+)
+
+# Executes the calculator tool
+calculator_executor = autogen.ConversableAgent(
+    name="Calculator_Executor",
+    llm_config=False,
+    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
+    human_input_mode="NEVER",
+)
+
+# Register the calculator function to the two agents.
+register_function(
+    calculator,
+    caller=calculator_assistant,  # The assistant agent can suggest calls to the calculator.
+    executor=calculator_executor,  # The executor agent can execute the calculator calls.
+    name="calculator",  # By default, the function name is used as the tool name.
+    description="A simple calculator",  # A description of the tool.
+)
+
+
+groupchat = autogen.GroupChat(agents=[user_proxy, engineer, scientist, planner, executor, critic, llamaindex_assistant, 
+                                      calculator_assistant, calculator_executor], messages=[], max_round=20)
 manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config_gpt)
 
-avatar = {user_proxy.name:"👨‍💼", engineer.name:"👩‍💻", scientist.name:"👩‍🔬", planner.name:"🗓", executor.name:"🛠", critic.name:'📝', llamaindex_assistant.name:"🦙"}
+avatar = {user_proxy.name:"👨‍💼", engineer.name:"👩‍💻", scientist.name:"👩‍🔬", planner.name:"🗓", executor.name:"🛠", 
+          critic.name:'📝', llamaindex_assistant.name:"🦙", calculator_executor.name:"🔢", calculator_assistant.name:"🔢"}
 
 def print_messages(recipient, messages, sender, config):
     print(f"Messages from: {sender.name} sent to: {recipient.name} | num messages: {len(messages)} | message: {messages[-1]}")
 
     content = messages[-1]['content']
-    
-    print(all(key in messages[-1] for key in ['name']))
-    if all(key in messages[-1] for key in ['name']):
-        if messages[-1]['name'] != 'Admin':
-            chat_interface.send(content, user=messages[-1]['name'], avatar=avatar[messages[-1]['name']], respond=False)
-    else:
+    if len(messages)>1 and content != '':
         chat_interface.send(content, user=recipient.name, avatar=avatar[recipient.name], respond=False)
-    
+
     return False, None  # required to ensure the agent communication flow continues
 
 user_proxy.register_reply(
@@ -148,6 +171,7 @@ engineer.register_reply(
     reply_func=print_messages, 
     config={"callback": None},
 ) 
+
 scientist.register_reply(
     [autogen.Agent, None],
     reply_func=print_messages, 
@@ -171,6 +195,18 @@ critic.register_reply(
 ) 
 
 llamaindex_assistant.register_reply(
+    [autogen.Agent, None],
+    reply_func=print_messages, 
+    config={"callback": None},
+) 
+
+calculator_executor.register_reply(
+    [autogen.Agent, None],
+    reply_func=print_messages, 
+    config={"callback": None},
+) 
+
+calculator_assistant.register_reply(
     [autogen.Agent, None],
     reply_func=print_messages, 
     config={"callback": None},
