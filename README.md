@@ -12,6 +12,8 @@ git clone https://github.com/the-foldables/autogen-prototype.git
 cd autogen-prototype
 ```
 
+### Packages
+
 Create a conda environment:
 ```
 conda create --name autogen_env python=3.12
@@ -29,8 +31,23 @@ Deactivate environment:
 conda deactivate
 ```
 
+### Docker
+
 Install [Docker](https://docs.docker.com/engine/install/).
 
+### Secrets
+
+Create a file `.env.development.local` at the base (root) of this repo
+that contains secrets that should NEVER be checked into GitHub:
+
+```
+export API_KEY={your-openai-api-key}
+export GROQ_API_KEY=abc...123
+# more keys...
+# ...
+```
+
+Make sure `.env.development.local` is in you `.gitignore`!
 
 ## Startup Instructions
 
@@ -40,14 +57,12 @@ After installation, you can startup in a new terminal with the following instruc
 export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
-export API_KEY={your-openai-api-key} 
+source .env.development.local
 ```
 
 Open Docker in the background.
 
 ## Run the code
-
-### OpenAI API key
 
 Simple test:
 ```

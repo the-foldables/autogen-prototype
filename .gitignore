@@ -1,9 +1,13 @@
 .DS_Store
+.env.development.local
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# .env* secrets - do NOT commit to GitHub repo!
+.env*
 
 # C extensions
 *.so
