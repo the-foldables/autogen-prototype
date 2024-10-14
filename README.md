@@ -39,6 +39,7 @@ that contains secrets that should NEVER be checked into GitHub:
 
 ```
 export API_KEY={your-openai-api-key}
+export GROQ_API_KEY=abc...123
 # more keys...
 # ...
 ```
