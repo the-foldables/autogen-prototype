@@ -20,16 +20,21 @@ def get_api_config(cborg):
     config_list = [
         {
             "model": model, "api_key": api_key, 
-                "base_url": base_url,
-                "api_rate_limit":60.0, "price" : [0, 0]
+            "base_url": base_url,
+            "api_rate_limit":60.0, "price" : [0, 0]
+        },
+        {
+            "model": model_gpt, "api_key": api_key, 
+            "base_url": base_url,
+            "api_rate_limit":60.0, "price" : [0, 0]
         }
     ]
 
     config_list_gpt = [
         {
             "model": model_gpt, "api_key": api_key, 
-                "base_url": base_url,
-                "api_rate_limit":60.0, "price" : [0, 0]
+            "base_url": base_url,
+            "api_rate_limit":60.0, "price" : [0, 0]
         }
     ]
 
