@@ -25,7 +25,7 @@ args = parser.parse_args()
 # Create a temporary directory to store code files created by the code_executor_agent_using_docker
 temp_dir = tempfile.TemporaryDirectory()
 
-llm_config, llm_config_gpt, llm, embedding = get_api_config(args.cborg)
+llm_config, llm, embedding = get_api_config(args.cborg)
 
 Settings.llm = llm
 Settings.embed_model = embedding
@@ -138,7 +138,7 @@ builder.AddAssistantAgent(
 calculator_assistant = builder.AddConversableAgent(
     name='Calculator_Assistant',
     system_message=prompts.calculator,
-    llm_config=llm_config_gpt,
+    llm_config=llm_config,
     avatar='🔢',
 )
 
@@ -162,7 +162,7 @@ register_function(
 
 
 groupchat = builder.GroupChat(messages=[], max_round=20)
-manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config_gpt)
+manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
 
 avatar = builder.Avatars()
 

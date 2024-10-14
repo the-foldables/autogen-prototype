@@ -30,22 +30,9 @@ def get_api_config(cborg):
         }
     ]
 
-    config_list_gpt = [
-        {
-            "model": model_gpt, "api_key": api_key, 
-            "base_url": base_url,
-            "api_rate_limit":60.0, "price" : [0, 0]
-        }
-    ]
-
     llm_config = {
         "temperature": 0,
         "config_list": config_list,
-    }
-
-    llm_config_gpt = {
-        "temperature": 0,
-        "config_list": config_list_gpt,
     }
 
     llm = LiteLLM(
@@ -60,4 +47,4 @@ def get_api_config(cborg):
         api_base=base_url,
     )
 
-    return llm_config, llm_config_gpt, llm, embedding
+    return llm_config, llm, embedding
