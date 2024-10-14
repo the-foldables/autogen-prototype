@@ -125,6 +125,7 @@ builder.AddConversableAgent(
     system_message=prompts.executor,
     code_execution_config={'executor': code_executor},  # Use the docker command line code executor.
     avatar='🛠',
+    human_input_mode='NEVER',
 )
 
 builder.AddAssistantAgent(
@@ -147,6 +148,7 @@ calculator_executor = builder.AddConversableAgent(
     llm_config=False,
     is_termination_msg=lambda msg: msg.get('content') is not None and 'TERMINATE' in msg['content'],
     avatar='🔢',
+    human_input_mode='NEVER',
 )
 
 # Register the calculator function to the two agents.
