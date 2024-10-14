@@ -16,6 +16,7 @@ import panel as pn
 import prompts
 from tools import calculator
 from api_config import get_api_config
+from agent_builder import AgentBuilder
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cborg', action='store_true', help='Running with LBNL credentials')
@@ -40,7 +41,7 @@ llamaindex_specialist = ReActAgent.from_tools(
 )
 
 llamaindex_assistant = LLamaIndexConversableAgent(
-    name="llamaindex_assistant",
+    name='llamaindex_assistant',
     llama_index_agent=llamaindex_specialist,
     system_message=prompts.llamaindex_assistant,
     description=prompts.llamaindex_assistant_description,
@@ -53,7 +54,7 @@ class MyConversableAgent(autogen.ConversableAgent):
     async def a_get_human_input(self, prompt: str) -> str:
         global input_future
         print('Getting human input!')
-        chat_interface.send(prompt, user="System", respond=False)
+        chat_interface.send(prompt, user='System', respond=False)
         # Create a new Future object for this input operation if none exists
         if input_future is None or input_future.done():
             input_future = asyncio.Future()
@@ -67,71 +68,126 @@ class MyConversableAgent(autogen.ConversableAgent):
         return input_value
 
 user_proxy = MyConversableAgent(
-   name="Admin",
-   is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("exit"),
+   name='Admin',
+   is_termination_msg=lambda x: x.get('content', '').rstrip().endswith('exit'),
    system_message=prompts.user_proxy,
    #Only say APPROVED in most cases, and say exit when nothing to be done further. Do not say others.
    code_execution_config=False,
-   #default_auto_reply="Approved", 
-   human_input_mode="ALWAYS",
+   #default_auto_reply='Approved',
+   human_input_mode='ALWAYS',
 )
 
-engineer = autogen.AssistantAgent(
-    name="Engineer",
-    human_input_mode="NEVER",
+builder = AgentBuilder(
+    human_input_mode='NEVER',
     llm_config=llm_config,
+)
+
+builder.AddOtherAgent(
+    name='Admin',
+    agent=user_proxy,
+    avatar='👨‍💼',
+)
+
+builder.AddOtherAgent(
+    name='llamaindex_assistant',
+    agent=llamaindex_assistant,
+    avatar='🦙',
+)
+
+# engineer = autogen.AssistantAgent(
+#     name='Engineer',
+#     human_input_mode='NEVER',
+#     llm_config=llm_config,
+#     system_message=prompts.engineer,
+# )
+builder.AddAssistantAgent(
+    name='Engineer',
     system_message=prompts.engineer,
+    avatar='👩‍💻',
 )
 
-scientist = autogen.AssistantAgent(
-    name="Scientist",
-    human_input_mode="NEVER",
-    llm_config=llm_config,
-    system_message=prompts.scientist
+# scientist = autogen.AssistantAgent(
+#     name='Scientist',
+#     human_input_mode='NEVER',
+#     llm_config=llm_config,
+#     system_message=prompts.scientist
+# )
+builder.AddAssistantAgent(
+    name='Scientist',
+    system_message=prompts.scientist,
+    avatar='👩‍🔬',
 )
 
-planner = autogen.AssistantAgent(
-    name="Planner",
-    human_input_mode="NEVER",
+# planner = autogen.AssistantAgent(
+#     name='Planner',
+#     human_input_mode='NEVER',
+#     system_message=prompts.planner,
+#     llm_config=llm_config,
+# )
+builder.AddAssistantAgent(
+    name='Planner',
     system_message=prompts.planner,
-    llm_config=llm_config,
+    avatar='🗓',
 )
 
 # Create a Docker command line code executor.
 code_executor = DockerCommandLineCodeExecutor(
-    image="python:3.12-slim",  # Execute code using the given docker image name.
+    image='python:3.12-slim',  # Execute code using the given docker image name.
     timeout=10,  # Timeout for each code execution in seconds.
     work_dir=temp_dir.name,  # Use the temporary directory to store the code files.
 )
 
 # Create an agent with code executor configuration that uses docker.
-executor = autogen.ConversableAgent(
-    name="Executor",
+# executor = autogen.ConversableAgent(
+#     name='Executor',
+#     system_message=prompts.executor,
+#     code_execution_config={'executor': code_executor},  # Use the docker command line code executor.
+#     human_input_mode='NEVER',
+# )
+builder.AddConversableAgent(
+    name='Executor',
     system_message=prompts.executor,
-    code_execution_config={"executor": code_executor},  # Use the docker command line code executor.
-    human_input_mode="NEVER",  
+    code_execution_config={'executor': code_executor},  # Use the docker command line code executor.
+    avatar='🛠',
 )
 
-critic = autogen.AssistantAgent(
-    name="Critic",
+# critic = autogen.AssistantAgent(
+#     name='Critic',
+#     system_message=prompts.critic,
+#     llm_config=llm_config,
+#     human_input_mode='NEVER',
+# )
+builder.AddAssistantAgent(
+    name='Critic',
     system_message=prompts.critic,
-    llm_config=llm_config,
-    human_input_mode="NEVER",
+    avatar='📝',
 )
 
 # Suggests use of the calculator
-calculator_assistant = autogen.ConversableAgent(
-    name="Calculator_Assistant",
+# calculator_assistant = autogen.ConversableAgent(
+#     name='Calculator_Assistant',
+#     system_message=prompts.calculator,
+#     llm_config=llm_config_gpt,
+# )
+calculator_assistant = builder.AddConversableAgent(
+    name='Calculator_Assistant',
     system_message=prompts.calculator,
     llm_config=llm_config_gpt,
+    avatar='🔢',
 )
 
 # Executes the calculator tool
-calculator_executor = autogen.ConversableAgent(
-    name="Calculator_Executor",
+# calculator_executor = autogen.ConversableAgent(
+#     name='Calculator_Executor',
+#     llm_config=False,
+#     is_termination_msg=lambda msg: msg.get('content') is not None and 'TERMINATE' in msg['content'],
+#     human_input_mode='NEVER',
+# )
+calculator_executor = builder.AddConversableAgent(
+    name='Calculator_Executor',
     llm_config=False,
-    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
-    human_input_mode="NEVER",
+    is_termination_msg=lambda msg: msg.get('content') is not None and 'TERMINATE' in msg['content'],
+    avatar='🔢',
 )
 
 # Register the calculator function to the two agents.
@@ -139,79 +195,77 @@ register_function(
     calculator,
     caller=calculator_assistant,  # The assistant agent can suggest calls to the calculator.
     executor=calculator_executor,  # The executor agent can execute the calculator calls.
-    name="calculator",  # By default, the function name is used as the tool name.
-    description="A simple calculator",  # A description of the tool.
+    name='calculator',  # By default, the function name is used as the tool name.
+    description='A simple calculator',  # A description of the tool.
 )
 
 
-groupchat = autogen.GroupChat(agents=[user_proxy, engineer, scientist, planner, executor, critic, llamaindex_assistant, 
-                                      calculator_assistant, calculator_executor], messages=[], max_round=20)
+# groupchat = autogen.GroupChat(agents=[user_proxy, engineer, scientist, planner, executor, critic, llamaindex_assistant,
+#                                       calculator_assistant, calculator_executor], messages=[], max_round=20)
+groupchat = builder.GroupChat(messages=[], max_round=20)
 manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config_gpt)
 
-avatar = {user_proxy.name:"👨‍💼", engineer.name:"👩‍💻", scientist.name:"👩‍🔬", planner.name:"🗓", executor.name:"🛠", 
-          critic.name:'📝', llamaindex_assistant.name:"🦙", calculator_executor.name:"🔢", calculator_assistant.name:"🔢"}
+# avatar = {user_proxy.name:'👨‍💼', engineer.name:'👩‍💻', scientist.name:'👩‍🔬', planner.name:'🗓', executor.name:'🛠',
+#           critic.name:'📝', llamaindex_assistant.name:'🦙', calculator_executor.name:'🔢', calculator_assistant.name:'🔢'}
+avatar = builder.Avatars()
 
 def print_messages(recipient, messages, sender, config):
-    print(f"Messages from: {sender.name} sent to: {recipient.name} | num messages: {len(messages)} | message: {messages[-1]}")
+    print(f'Messages from: {sender.name} sent to: {recipient.name} | num messages: {len(messages)} | message: {messages[-1]}')
 
     content = messages[-1]['content']
-    user = messages[-1]['name'] 
+    user = messages[-1]['name']
     if len(messages)>1 and content != '' and user != 'Admin':
         chat_interface.send(content, user=user, avatar=avatar[user], respond=False)
 
     return False, None  # required to ensure the agent communication flow continues
 
-user_proxy.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-)
+builder.RegisterReply(reply_func=print_messages)
 
-engineer.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-
-scientist.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-planner.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-)
-
-executor.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-critic.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-
-llamaindex_assistant.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-
-calculator_executor.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
-
-calculator_assistant.register_reply(
-    [autogen.Agent, None],
-    reply_func=print_messages, 
-    config={"callback": None},
-) 
+# user_proxy.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# engineer.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# scientist.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# planner.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# executor.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# critic.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# llamaindex_assistant.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# calculator_executor.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
+# calculator_assistant.register_reply(
+#     [autogen.Agent, None],
+#     reply_func=print_messages,
+#     config={"callback": None},
+# )
 
 pn.extension(design="material")
 
@@ -230,7 +284,7 @@ async def delayed_initiate_chat(agent, recipient, message):
     await agent.a_initiate_chat(recipient, message=message)
 
 async def callback(contents: str, user: str, instance: pn.chat.ChatInterface):
-    
+
     global initiate_chat_task_created
     global input_future
 
