@@ -34,13 +34,22 @@ Install [Docker](https://docs.docker.com/engine/install/).
 
 ## Startup Instructions
 
+First, create a file `.env.development.local` at the base (root) of this repo
+that contains secrets that should NEVER be checked into GitHub:
+
+```
+export API_KEY={your-openai-api-key}
+# more keys...
+# ...
+```
+
 After installation, you can startup in a new terminal with the following instructions:
 
 ```
 export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
-export API_KEY={your-openai-api-key} 
+source .env.development.local
 ```
 
 Open Docker in the background.
