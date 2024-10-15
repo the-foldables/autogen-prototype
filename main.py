@@ -107,6 +107,12 @@ builder.AddAssistantAgent(
 )
 
 builder.AddAssistantAgent(
+    name='Medicinal_Chemist',
+    system_message=prompts.medical_chemist,
+    avatar='💊',
+)
+
+builder.AddAssistantAgent(
     name='Planner',
     system_message=prompts.planner,
     avatar='🗓',
@@ -146,7 +152,7 @@ calculator_assistant = builder.AddConversableAgent(
 calculator_executor = builder.AddConversableAgent(
     name='Calculator_Executor',
     llm_config=False,
-    is_termination_msg=lambda msg: msg.get('content') is not None and 'TERMINATE' in msg['content'],
+    # is_termination_msg=lambda msg: msg.get('content') is not None and 'TERMINATE' in msg['content'],
     avatar='🔢',
     human_input_mode='NEVER',
 )
