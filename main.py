@@ -12,10 +12,11 @@ from autogen.coding import DockerCommandLineCodeExecutor
 from autogen import register_function
 
 import panel as pn
+import numpy as np
 
 import prompts
 from tools.calculator import calculator
-from tools.esm3 import esm_generate, save_protein
+from tools.esm3 import esm_generate, pdb_lookup
 from api_config import get_api_config
 from agent_builder import AgentBuilder
 
@@ -189,11 +190,36 @@ protein_generator_executor = builder.AddConversableAgent(
 register_function(
     esm_generate,
     caller=protein_generator_assistant,  # The assistant agent can suggest calls.
-    executor=calculator_executor,  # The executor agent can execute the call.
+    executor=protein_generator_executor,  # The executor agent can execute the call.
     name='esm_generate',  # By default, the function name is used as the tool name.
     description=prompts.esm_generate_description,  # A description of the tool.
 )
 
+
+# Suggests use of pdb_lookup
+pdb_assistant = builder.AddConversableAgent(
+    name='PDB_Assistant',
+    system_message=prompts.pdb_lookup,
+    llm_config=llm_config,
+    avatar='🗄️',
+)
+
+# Executes the pdb_lookup tool
+pdb_lookup_executor = builder.AddConversableAgent(
+    name='PDB_Lookup',
+    llm_config=False,
+    avatar='🗄️',
+    human_input_mode='NEVER',
+)
+
+# Register the calculator function to the two agents.
+register_function(
+    pdb_lookup,
+    caller=pdb_assistant,  # The assistant agent can suggest calls.
+    executor=pdb_lookup_executor,  # The executor agent can execute the call.
+    name='pdb_lookup',  # By default, the function name is used as the tool name.
+    description=prompts.pdb_lookup_description,  # A description of the tool.
+)
 
 groupchat = builder.GroupChat(messages=[], max_round=20)
 manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
