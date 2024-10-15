@@ -14,9 +14,11 @@ from autogen import register_function
 import panel as pn
 
 import prompts
-from tools import calculator
+from tools.calculator import calculator
+from tools.esm3 import esm_generate, save_protein
 from api_config import get_api_config
 from agent_builder import AgentBuilder
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cborg', action='store_true', help='Running with LBNL credentials')
@@ -108,7 +110,7 @@ builder.AddAssistantAgent(
 
 builder.AddAssistantAgent(
     name='Medicinal_Chemist',
-    system_message=prompts.medical_chemist,
+    system_message=prompts.medicinal_chemist,
     avatar='💊',
 )
 
@@ -164,6 +166,32 @@ register_function(
     executor=calculator_executor,  # The executor agent can execute the calculator calls.
     name='calculator',  # By default, the function name is used as the tool name.
     description='A simple calculator',  # A description of the tool.
+)
+
+
+# Suggests use of esm_generate
+protein_generator_assistant = builder.AddConversableAgent(
+    name='ESM3_Assistant',
+    system_message=prompts.protein_generator,
+    llm_config=llm_config,
+    avatar='🧬',
+)
+
+# Executes the esm_generate tool
+protein_generator_executor = builder.AddConversableAgent(
+    name='ESM3_Executor',
+    llm_config=False,
+    avatar='🧬',
+    human_input_mode='NEVER',
+)
+
+# Register the calculator function to the two agents.
+register_function(
+    esm_generate,
+    caller=protein_generator_assistant,  # The assistant agent can suggest calls.
+    executor=calculator_executor,  # The executor agent can execute the call.
+    name='esm_generate',  # By default, the function name is used as the tool name.
+    description=prompts.esm_generate_description,  # A description of the tool.
 )
 
 
