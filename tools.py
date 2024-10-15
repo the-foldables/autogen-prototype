@@ -14,3 +14,6 @@ def calculator(a: float, b: float, operator: Annotated[Operator, "operator"]) ->
         return a / b
     else:
         raise ValueError("Invalid operator")
+
+def esm_generate():
+    pass
