@@ -3,6 +3,8 @@ Prototype of the Foldables platform with AutoGen
 
 ## Install Instructions
 
+### Get the repository
+
 Clone the repository:
 
 ```
@@ -11,29 +13,6 @@ cd $WORKING_DIR
 git clone https://github.com/the-foldables/autogen-prototype.git
 cd autogen-prototype
 ```
-
-### Packages
-
-Create a conda environment:
-```
-conda create --name autogen_env python=3.12
-conda activate autogen_env
-```
-
-Install packages:
-```
-python -m pip install -r requirements.txt
-brew install libomp
-```
-
-Deactivate environment:
-```
-conda deactivate
-```
-
-### Docker
-
-Install [Docker](https://docs.docker.com/engine/install/).
 
 ### Secrets
 
@@ -49,6 +28,24 @@ export GROQ_API_KEY=abc...123
 
 Make sure `.env.development.local` is in you `.gitignore`!
 
+### Conda environment
+
+Create conda environment and install dependencies
+```
+./scripts/conda-create.sh
+```
+
+Can deactivate the conda environment:
+```
+conda deactivate
+```
+
+
+### Docker
+
+Install [Docker](https://docs.docker.com/engine/install/).
+
+
 ## Startup Instructions
 
 After installation, you can startup in a new terminal with the following instructions:
@@ -57,7 +54,6 @@ After installation, you can startup in a new terminal with the following instruc
 export WORKING_DIR={your-working-directory}
 cd $WORKING_DIR
 conda activate autogen_env
-source .env.development.local
 ```
 
 Open Docker in the background.
@@ -66,12 +62,12 @@ Open Docker in the background.
 
 Simple test:
 ```
-panel serve test_panel.py
+./scripts/panel-test.sh
 ```
 
 AutoGen with panel example:
 ```
-panel serve main.py 
+./scripts/serve.sh
 ```
 
 ## Resources
