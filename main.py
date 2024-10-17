@@ -206,10 +206,11 @@ pdb_assistant = builder.AddConversableAgent(
 
 # Executes the pdb_lookup tool
 pdb_lookup_executor = builder.AddConversableAgent(
-    name='PDB_Lookup',
+    name='PDB_Lookup_Executor',
     llm_config=False,
     avatar='🗄️',
     human_input_mode='NEVER',
+    description='This tool is always picked after PDB_Assistant and never before.'
 )
 
 # Register the calculator function to the two agents.

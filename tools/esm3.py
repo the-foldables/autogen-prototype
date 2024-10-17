@@ -1,4 +1,4 @@
-from typing import Literal, Annotated, List, Tuple
+from typing import Literal, Annotated, List, Tuple, Union
 
 import os
 import numpy as np
@@ -20,6 +20,10 @@ model = client(
 Track = Literal["sequence", "structure"]
 
 def pdb_lookup(pdb_id: str, chain_id: str) -> Tuple[str, List[List[List[float]]]]:
+    """
+    Example command:
+    pdb_lookup("1ITU","A")
+    """
     if len(pdb_id) != 4:
         raise ValueError(f"Invalid PDB ID length: {len(pdb_id)}. Expected length is 4.")
     protein = ProteinChain.from_rcsb(pdb_id, chain_id)
@@ -28,12 +32,26 @@ def pdb_lookup(pdb_id: str, chain_id: str) -> Tuple[str, List[List[List[float]]]
     return sequence, coordinates
 
 
-def esm_generate(sequence_prompt: str, structure_prompt: List[List[List[float]]], 
+
+def esm_generate(sequence_prompt: str, structure_prompt: List[List[List[Union[float, None]]]], 
                  track: Annotated[Track, "track"], num_decode_steps: int) -> Tuple[str, List[List[List[float]]]]:
     
-    if len(sequence_prompt) != len(structure_prompt):
-        raise ValueError(f"Invalid sequence_prompt length: {len(sequence_prompt)}. Expected length is {len(structure_prompt)}.")
-        
+    """
+    Example command:
+    esm_generate( '____', [[[None]*3]*37]*4, 'sequence', 2)
+    """
+    
+    # enforce lengths
+    if len(sequence_prompt) < len(structure_prompt):
+        structure_prompt = structure_prompt[0:len(sequence_prompt)]
+    else:
+        sequence_prompt = sequence_prompt[0:len(structure_prompt)]
+
+    # Switch None to np.nan
+    structure_prompt = np.array(structure_prompt)
+    structure_prompt[structure_prompt==None]=np.nan
+    structure_prompt = structure_prompt.astype(float)
+
     protein_prompt = ESMProtein(sequence=sequence_prompt, coordinates=torch.tensor(structure_prompt))
 
     sequence_generation_config = GenerationConfig(
@@ -45,6 +63,12 @@ def esm_generate(sequence_prompt: str, structure_prompt: List[List[List[float]]]
     # Now, we can use the `generate` method of the model to decode the sequence
     generated_protein = model.generate(protein_prompt, sequence_generation_config)
     generated_protein.to_pdb("generated.pdb")
-    return generated_protein.sequence, generated_protein.coordinates.tolist()
+
+    coords = generated_protein.coordinates.numpy()
+    nan_coords = np.isnan(coords)
+    coords=coords.astype(object)
+    coords[nan_coords]=None
+
+    return generated_protein.sequence, coords.tolist()
 
     
