@@ -184,6 +184,7 @@ protein_generator_executor = builder.AddConversableAgent(
     llm_config=False,
     avatar='🧬',
     human_input_mode='NEVER',
+    description='This tool is always picked after ESM3_Assistant and never before.'
 )
 
 # Register the calculator function to the two agents.
