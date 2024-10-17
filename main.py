@@ -187,7 +187,7 @@ protein_generator_executor = builder.AddConversableAgent(
     description='This tool is always picked after ESM3_Assistant and never before.'
 )
 
-# Register the calculator function to the two agents.
+# Register the esm_generate function to the two agents.
 register_function(
     esm_generate,
     caller=protein_generator_assistant,  # The assistant agent can suggest calls.
@@ -214,7 +214,7 @@ pdb_lookup_executor = builder.AddConversableAgent(
     description='This tool is always picked after PDB_Assistant and never before.'
 )
 
-# Register the calculator function to the two agents.
+# Register the pdb_lookup function to the two agents.
 register_function(
     pdb_lookup,
     caller=pdb_assistant,  # The assistant agent can suggest calls.
