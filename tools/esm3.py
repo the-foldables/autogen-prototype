@@ -28,8 +28,8 @@ def pdb_lookup(pdb_id: str, chain_id: str) -> Tuple[str, List[List[List[float]]]
         raise ValueError(f"Invalid PDB ID length: {len(pdb_id)}. Expected length is 4.")
     protein = ProteinChain.from_rcsb(pdb_id, chain_id)
     sequence = protein.sequence
-    coordinates = protein.atom37_positions.tolist()
-    return sequence, coordinates
+    # coordinates = protein.atom37_positions.tolist()
+    return sequence
 
 
 
@@ -64,11 +64,12 @@ def esm_generate(sequence_prompt: str, structure_prompt: List[List[List[Union[fl
     generated_protein = model.generate(protein_prompt, sequence_generation_config)
     generated_protein.to_pdb("generated.pdb")
 
-    coords = generated_protein.coordinates.numpy()
-    nan_coords = np.isnan(coords)
-    coords=coords.astype(object)
-    coords[nan_coords]=None
+    # coords = generated_protein.coordinates.numpy()
+    # nan_coords = np.isnan(coords)
+    # coords=coords.astype(object)
+    # coords[nan_coords]=None
+    # coords = coords.tolist()
 
-    return generated_protein.sequence, coords.tolist()
+    return generated_protein.sequence
 
     
