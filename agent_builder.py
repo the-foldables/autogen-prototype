@@ -21,7 +21,7 @@ class AgentBuilder:
     self.other_agents.append(agent)
     return agent
 
-  def AddAssistantAgent(self, name=None, system_message=None, avatar=None):
+  def AddAssistantAgent(self, name=None, system_message=None, avatar=None, description='an assistant agent'):
     if (name == None or system_message == None or avatar == None):
       raise 'missing required arguments'
 
@@ -32,14 +32,15 @@ class AgentBuilder:
       human_input_mode=self.human_input_mode,
       llm_config=self.llm_config,
       system_message=system_message,
-      description='an assistant agent'
+      description=description
     )
     self.assistant_agents.append(agent)
     print(f'Added assistant agent "{name}" {avatar}')
     return agent
 
   def AddConversableAgent(self, name=None, system_message=None, code_execution_config={}, avatar=None,
-                          llm_config=False, is_termination_msg=None, human_input_mode=None):
+                          llm_config=False, is_termination_msg=None, human_input_mode=None,
+                          description='a conversable agent'):
     if (name == None or avatar == None):
       raise 'missing required arguments'
 
@@ -52,7 +53,7 @@ class AgentBuilder:
       system_message=system_message,
       llm_config=llm_config,
       is_termination_msg=is_termination_msg,
-      description='a conversable agent'
+      description=description
     )
     self.conversable_agents.append(agent)
     print(f'Added conversable agent "{name}" {avatar}')

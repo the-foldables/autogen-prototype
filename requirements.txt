@@ -10,3 +10,5 @@ wikipedia
 llama-index-llms-litellm
 llama-index-embeddings-litellm
 panel
+torch torchvision torchaudio
+esm
