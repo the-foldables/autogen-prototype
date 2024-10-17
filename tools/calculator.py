@@ -2,7 +2,6 @@ from typing import Annotated, Literal
 
 Operator = Literal["+", "-", "*", "/"]
 
-
 def calculator(a: float, b: float, operator: Annotated[Operator, "operator"]) -> float:
     if operator == "+":
         return a + b
